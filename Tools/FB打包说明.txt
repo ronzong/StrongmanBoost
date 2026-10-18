@@ -23,6 +23,11 @@ Unity 通过 JS 桥读取已加载的配置；二进制不固化 App ID 和广�
 ZIP 根目录直接包含 index.html、facebook-config.json、fbapp-config.json 和 Build/。
 
 仅更换 ID（不重新编译 Unity）
+推荐：双击仓库根目录的 repackage-facebook.bat，依次输入 App ID、插屏完整 ID 和激励完整 ID。
+回车保留当前值；Ctrl+C 取消。参数不合法会提示重新输入，广告位必须以 App ID + 下划线开头。
+成功后自动保存 Tools/facebook-config.json，更新 FB ZIP、本地预览及校验信息；窗口显示 ZIP 路径。
+需要已安装 Python 3，并且已有成功构建；可以从任意目录运行 BAT。
+保留以下手动修改方式：
 1. 修改 Tools/facebook-config.json 的三个字符串。
 2. 在仓库根目录执行 python Tools/repackage-facebook.py。
    或 Unity 菜单 Build/StrongmanBoost/Repackage With External Config。
