@@ -1,3 +1,6 @@
+#if FB_INSTANT && UNITY_WEBGL
+using PlayerPrefs = FacebookPlayerPrefs;
+#endif
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

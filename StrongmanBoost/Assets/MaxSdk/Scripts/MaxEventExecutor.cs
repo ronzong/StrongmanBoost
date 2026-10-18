@@ -44,7 +44,8 @@ namespace AppLovinMax.Internal
 
         #region Public API
 
-#if UNITY_EDITOR
+// MAX editor implementation also compiles on non-mobile targets.
+#if UNITY_EDITOR || !(UNITY_ANDROID || UNITY_IPHONE || UNITY_IOS)
         public static MaxEventExecutor Instance
         {
             get

@@ -1,3 +1,6 @@
+#if FB_INSTANT && UNITY_WEBGL
+using PlayerPrefs = FacebookPlayerPrefs;
+#endif
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +23,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+#if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.P))
         {
             PlayerPrefs.DeleteAll();
@@ -29,6 +33,7 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.C))
             AddCash(5000);
+#endif
     }
 
     public void AddCash(int amount)

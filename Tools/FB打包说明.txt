@@ -1,0 +1,57 @@
+StrongmanBoost Facebook Instant Games
+
+仓库根目录：C:\Works\git\yxl\unitygame\StrongmanBoost
+Unity 工程：仓库内的 StrongmanBoost 子目录。
+Unity：2022.3.62f3（从 2021.3.31f1 升级，使用已安装的 WebGL Support）。
+场景：Assets/MyAssets/Scene/Game.unity；按现有 720x1280 UI 保持竖屏。
+官方插件：https://github.com/facebook/meta-instant-games-unity-plugin
+固定提交 ec32ba76dc3716b3a08e4ebe15e5b5725488e005；网页 SDK 8.0。
+沿用已验证的公共广告 API 桥、缓存释放和回调超时兼容修复。
+
+外部配置
+Tools/facebook-config.json 是配置源，包含 appId、interstitialPlacementId、rewardedPlacementId。
+构建和重打包把配置复制到 web/facebook-config.json，并同步 site/StrongmanBoost/facebook-config.json。
+网页先读取/校验 JSON，再初始化 SDK、设置玩家存档命名空间并启动 Unity。
+Unity 通过 JS 桥读取已加载的配置；二进制不固化 App ID 和广告位。
+缺失/非法配置显示启动失败，不回退到旧 ID。
+外部配置为公开参数，不允许放密钥。App ID 应与上传的 FB 应用一致。
+
+完整构建（在仓库根目录执行）
+  powershell -ExecutionPolicy Bypass -File .\Tools\build-facebook.ps1
+或 Unity 菜单 Build/StrongmanBoost/Facebook Instant Games。
+输出 Builds/Facebook/web 和 Builds/Facebook/StrongmanBoost-Facebook-AppID.zip。
+ZIP 根目录直接包含 index.html、facebook-config.json、fbapp-config.json 和 Build/。
+
+仅更换 ID（不重新编译 Unity）
+1. 修改 Tools/facebook-config.json 的三个字符串。
+2. 在仓库根目录执行 python Tools/repackage-facebook.py。
+   或 Unity 菜单 Build/StrongmanBoost/Repackage With External Config。
+3. 检查脚本打印的新 ZIP，上传到对应应用；已发布预览需要另行提交、推送。
+脚本需要先有一次成功的完整构建及预览导出。
+换 App ID 将切换本地存档命名空间，旧 App 存档保留但不会自动迁移。
+也可以直接修改已解压包根目录的 facebook-config.json 后重新压缩；注意保持 ZIP 根目录结构。
+只改广告位时存档命名空间保持不变。已打开的页面需重新加载才读取新配置。
+
+广告和存档
+不接 Banner；插屏保留卖出、购买升级和重开场景的原触发点，至少间隔 60 秒。
+无填充/失败后 30 秒重试，不阻塞玩法。激励仅在确认完成后发原规则 50 金币。
+取消、失败和重复点击不多发奖励；广告期间暂停游戏和音频，结束后恢复。
+未发现真实内购接口，游戏内金币购买升级保持原规则。
+PlayerPrefs 按 strongmanboost:AppID:玩家ID:v1 隔离，每次写入即存本地 localStorage。
+金币、力量、体型、已购升级、自动点击和声音设置保存；没有 FB 云同步。
+修正原体型动画结束前保存旧尺寸的问题；声音按钮控制音乐及音效。
+调试键 P/C/K 不进入发布版。Android/iOS 原广告路径保留，但移动构建未重新验收。
+修复 Tenjin iOS 编辑器引用和 MAX 非移动平台 Instance 条件，避免 WebGL 编译失败。
+WebGL 开启显式异常支持，确保 SDK 取消/无填充按失败回调处理而非 wasm abort。
+
+本地预览
+构建成功自动同步 ../site/StrongmanBoost；模拟 SDK 只用于预览，不进入 FB ZIP。
+仅同步现有包：Unity 菜单 Build/StrongmanBoost/Sync Existing Build To Site。
+在 unitygame/site 目录执行 python -m http.server 8080。
+访问 http://127.0.0.1:8080/StrongmanBoost/。
+预览模拟广告弹窗：确定表示完成；取消不发奖励；?ads=cancel 或 ?ads=nofill 可模拟失败。
+Tools/verify-facebook-bridge.cjs 检查 SDK 广告桥；Tools/verify-facebook-web.cjs 检查实际预览构建。
+日志、截图在 Logs（不提交）；Tools/facebook-build-info.json 记录当前 ZIP 校验值和验证状态。
+FB 真实环境、权限和真实广告展示必须人工上传后验收。未上传、未推送或发布。
+
+2026-10-18 本地验证通过：真实触摸训练/卖出、激励取消/完成/防重入、插屏冷却、金币升级购买、刷新后继续训练、自动训练开关、声音设置、场景重开、390x844 手机布局及新外部 ID 请求。升级测试使用正常激励完成回调辅助积累金币。模拟 SDK 验证期间无控制台错误、失败请求或外网请求；测试浏览器与临时服务器已关闭。FB 真实环境待人工验收。

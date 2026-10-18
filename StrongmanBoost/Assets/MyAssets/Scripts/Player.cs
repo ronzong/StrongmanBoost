@@ -1,3 +1,6 @@
+#if FB_INSTANT && UNITY_WEBGL
+using PlayerPrefs = FacebookPlayerPrefs;
+#endif
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -74,8 +77,6 @@ public class Player : MonoBehaviour
 
         SetPlayerSize(sizeIncreaseVal);
 
-        SavePlayerScale();
-
         healthAmountManager.GiveHealth(healthIncreaseVal);
     }
 
@@ -95,7 +96,8 @@ public class Player : MonoBehaviour
         playerHandPose.localPosition = handPosInitialValue;
         Vector3 handPosition = playerHandPose.localPosition;
 
-        PlayerPrefs.SetFloat("HandPos", handPosition.x);
+        PlayerPrefs.SetFloat("HandPosX", handPosition.x);
+        PlayerPrefs.SetFloat("HandPosZ", handPosition.z);
     }
 
     public void SetPlayerSkinSize(float val)
@@ -111,7 +113,7 @@ public class Player : MonoBehaviour
         targetScale.x += val;
         targetScale.y += val;
         targetScale.z += val;
-
+        SaveScale(targetScale);
         StartCoroutine(SmoothScaleCoroutine());
     }
 
@@ -126,6 +128,7 @@ public class Player : MonoBehaviour
 
         // Ensure the scale reaches the exact target value to avoid errors.
         scaleTransform.localScale = targetScale;
+        SavePlayerScale();
     }
 
     public void SetPlayerToInitialSize()
@@ -135,15 +138,21 @@ public class Player : MonoBehaviour
         targetScale.x = 1;
         targetScale.y = 1;
         targetScale.z = 1;
-
+        SaveScale(targetScale);
         StartCoroutine(SmoothScaleCoroutine());
     }
 
     private void SavePlayerScale()
     {
-        PlayerPrefs.SetFloat(scaleKeyX, scaleTransform.localScale.x);
-        PlayerPrefs.SetFloat(scaleKeyY, scaleTransform.localScale.y);
-        PlayerPrefs.SetFloat(scaleKeyZ, scaleTransform.localScale.z);
+        SaveScale(scaleTransform.localScale);
+    }
+
+    // 操作确认后先保存目标值，避免动画中刷新丢失本次成长。
+    private void SaveScale(Vector3 scale)
+    {
+        PlayerPrefs.SetFloat(scaleKeyX, scale.x);
+        PlayerPrefs.SetFloat(scaleKeyY, scale.y);
+        PlayerPrefs.SetFloat(scaleKeyZ, scale.z);
     }
 
     private void LoadPlayerScale()

@@ -29,10 +29,12 @@ public class AdsManager : MonoBehaviour
 
     private void Update()
     {
+#if UNITY_EDITOR
         if(Input.GetKeyDown(KeyCode.K))
         {
             FindObjectOfType<GameManager>().AddCash(50);
         }
+#endif
     }
 
     public void LoadBannerAd()
@@ -122,7 +124,9 @@ public class AdsManager : MonoBehaviour
         //    Debug.LogError("Interstitial ad is not ready yet.");
         //    RequestInterstitial();
         //}
-#if ADS_MAX
+#if FB_INSTANT && UNITY_WEBGL
+        StrongmanBoost.Platform.FacebookInstantGame.Instance.ShowInterstitial();
+#elif ADS_MAX
         ServicesManager_MAX.instance.ShowInterstitial();
 #endif
     }
@@ -175,7 +179,9 @@ public class AdsManager : MonoBehaviour
         //}
 
         //LoadRewardedAd();
-#if ADS_MAX
+#if FB_INSTANT && UNITY_WEBGL
+        ShowFacebookReward();
+#elif ADS_MAX
         callback = GiveReward;
         ServicesManager_MAX.instance.ShowRewardedAd(""  , callback);
 
@@ -184,6 +190,13 @@ public class AdsManager : MonoBehaviour
 #endif
     }
 
+#if FB_INSTANT && UNITY_WEBGL
+    // 每次展示使用独立结果；取消/失败/重复点击不发奖。
+    private async void ShowFacebookReward()
+    {
+        if (await StrongmanBoost.Platform.FacebookInstantGame.Instance.ShowRewardedAsync()) GiveReward();
+    }
+#endif
     private void GiveReward()
     {
         FindObjectOfType<GameManager>().AddCash(50);

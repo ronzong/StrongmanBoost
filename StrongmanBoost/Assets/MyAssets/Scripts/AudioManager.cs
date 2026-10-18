@@ -1,3 +1,6 @@
+#if FB_INSTANT && UNITY_WEBGL
+using PlayerPrefs = FacebookPlayerPrefs;
+#endif
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -47,14 +50,14 @@ public class AudioManager : MonoBehaviour
         if (soundToggle)
         {
             audioBtnImage.sprite = audioOn;
-            //audioSource.mute = false;
+            audioSource.mute = false;
             bgAudioSource.mute = false;
             PlayerPrefs.DeleteKey("Sound");
         }
         else
         {
             audioBtnImage.sprite = audioOff;
-            //audioSource.mute = true;
+            audioSource.mute = true;
             bgAudioSource.mute = true;
             print("Mute");
 
